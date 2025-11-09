@@ -1,2 +1,2 @@
 # CI-Guardrail
-AppSec CI Pipeline (Semgrep + CodeQL + OWASP ZAP)
+AppSec CI Pipeline using Semgrep + CodeQL + OWASP ZAP
