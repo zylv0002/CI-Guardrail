@@ -30,7 +30,7 @@ jobs:
 
       - name: Fail on high severity
         run: |
-          python -c "
+          python <<EOF
           import json,sys
           r=json.load(open('semgrep-report.json'))
           high = [e for e in r.get('results',[]) if e.get('extra',{}).get('severity') in ('ERROR','CRITICAL','HIGH')]
@@ -38,4 +38,4 @@ jobs:
             print(f"Found {len(high)} high severity findings. Failing.")
             sys.exit(1)
           print("No high severity")
-          "
+          EOF
