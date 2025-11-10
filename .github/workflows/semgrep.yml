@@ -20,7 +20,11 @@ jobs:
         run: pip install semgrep
 
       - name: Run Semgrep (CI rules)
-        run: semgrep --config p/ci,p/python, p/default --json --output semgrep-report.json .
+        run: |
+          semgrep scan \
+          --config p/ci \
+          --config p/python \
+          --json --output semgrep-report.json .
 
       - name: Upload Semgrep report
         uses: actions/upload-artifact@v4
