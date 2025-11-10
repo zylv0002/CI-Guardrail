@@ -1,0 +1,42 @@
+name: SAST - Semgrep
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  semgrep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Semgrep
+        run: pip install semgrep
+
+      - name: Run Semgrep (CI rules)
+        run: semgrep --config p/ci --json --output semgrep-report.json .
+
+      - name: Upload Semgrep report
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-report
+          path: semgrep-report.json
+
+      - name: Fail on high severity
+        run: |
+          python -c
+          "
+          import json,sys
+          r=json.load(open('semgrep-report.json'))
+          high = [e for e in r.get('results',[]) if e.get('extra',{}).get('severity') in ('ERROR','CRITICAL','HIGH')]
+          if high:
+            print(f"Found {len(high)} high severity findings. Failing.")
+            sys.exit(1)
+          print("No high severity")
+          "

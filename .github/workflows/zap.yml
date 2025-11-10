@@ -1,0 +1,43 @@
+name: DAST - ZAP baseline (Juice Shop)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 8 * * *'  # Run automatically at 3AM EST (8AN UTC)
+
+jobs:
+  zap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create network
+        run: docker network create zapnet
+
+      - name: Start Juice Shop
+        run: |
+          docker run -d --name juice --network zapnet -p 3000:3000 bkimminich/juice-shop
+          # wait for health
+          for i in `seq 1 30`; do
+            if curl -sSf http://localhost:3000 >/dev/null; then echo "App is up"; break; else sleep 3; fi
+          done
+
+      - name: Run ZAP baseline (container-to-container)
+        run: |
+          docker run --rm --network zapnet -v $PWD:/zap/wrk/:rw \
+            owasp/zap2docker-stable zap-baseline.py \
+            -t http://juice:3000 \
+            -r zap_report.html \
+            -m 3  # max 3 minutes baseline (可调)
+
+      - name: Upload ZAP report
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap_report
+          path: zap_report.html
+
+      - name: Stop containers
+        if: always()
+        run: |
+          docker rm -f juice || true
+          docker network rm zapnet || true
