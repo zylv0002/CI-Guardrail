@@ -28,7 +28,7 @@ jobs:
             owasp/zap2docker-stable zap-baseline.py \
             -t http://juice:3000 \
             -r zap_report.html \
-            -m 3  # max 3 minutes baseline (可调)
+            -m 3  # max 3 minutes baseline 
 
       - name: Upload ZAP report
         uses: actions/upload-artifact@v4
@@ -40,4 +40,5 @@ jobs:
         if: always()
         run: |
           docker rm -f juice || true
+
           docker network rm zapnet || true
