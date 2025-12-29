@@ -22,11 +22,12 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
-          languages: javascript, python # 可按项目实际修改
-          # queries: security-extended,security-and-quality  # 可选
+          languages: javascript, python 
+          # queries: security-extended,security-and-quality 
 
       - name: Autobuild
         uses: github/codeql-action/autobuild@v3
 
       - name: Perform CodeQL Analysis
+
         uses: github/codeql-action/analyze@v3
